@@ -1,10 +1,8 @@
 package chapter2
 
-import cats.instances.int._
 import cats.syntax.semigroup._
 
 object SuperAdder {
 
-  def add(items: List[Int]): Int = items.sum
-  def addUsingMonoids(items: List[Int]): Int = items.foldLeft(cats.Monoid[Int].empty)(_ |+| _)
+  def add[A](items: List[A])(implicit ev: cats.Monoid[A]): A = items.foldLeft(cats.Monoid[A].empty)( _ |+| _)
 }
