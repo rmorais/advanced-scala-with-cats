@@ -1,77 +1,44 @@
 package chapter2
 
-trait SemiGroup[A] {
+import chapter2.BooleanMonoidLaws.property
+import org.scalacheck.Arbitrary
+
+
+trait Semigroup[A] {
   def combine(x: A, y: A): A
 }
 
-trait Monoid[A] extends SemiGroup[A] {
+trait Monoid[A] extends Semigroup[A] {
   def empty: A
 }
 
 object Monoid {
-  def apply[A](implicit monoid: Monoid[A]) = monoid
+  def apply[A](implicit monoid: Monoid[A]) =
+    monoid
 }
 
-object BooleanMonoids {
+trait MonoidLaws {
 
-  implicit val booleanOrMonoid: Monoid[Boolean] = new Monoid[Boolean] {
+  private def identityLaw[A](x: A)(implicit monoid: Monoid[A]): Boolean =
+    (monoid.combine(x, monoid.empty) == x) &&
+      (monoid.combine(monoid.empty, x) == x)
 
-    override def empty: Boolean = false
-
-    override def combine(x: Boolean, y: Boolean): Boolean = x || y
+  private def associativeLaw[A](x: A, y: A, z: A)(implicit m: Monoid[A]): Boolean = {
+    m.combine(x, m.combine(y, z)) ==
+      m.combine(m.combine(x, y), z)
   }
 
-  implicit val booleanAndMonoid: Monoid[Boolean] = new Monoid[Boolean] {
-    override def empty: Boolean = true
+  import org.scalacheck.Prop.forAll
 
-    override def combine(x: Boolean, y: Boolean): Boolean = x && y
+  def identity[A: Arbitrary](monoid: Monoid[A]) = {
+    property(monoid.getClass.getName) = forAll { a: A =>
+      identityLaw(a)(monoid)
+    }
   }
 
-  implicit val booleanEitherMonoid: Monoid[Boolean] = new Monoid[Boolean] {
-
-    override def empty: Boolean = false
-
-    override def combine(x: Boolean, y: Boolean): Boolean =
-      (x && !y) || (!x && y)
+  def associativity[A: Arbitrary](monoid: Monoid[A]) = {
+    property(monoid.getClass.getName) = forAll { (a: A, b: A, c: A) =>
+      associativeLaw(a, b, c)(monoid)
+    }
   }
-
-  implicit val booleanXnorMonoid: Monoid[Boolean] = new Monoid[Boolean] {
-    override def empty: Boolean = true
-
-    override def combine(x: Boolean, y: Boolean): Boolean =
-      (x || !y) && (!x || y)
-  }
-}
-
-object SetMonoids {
-  implicit def setUnionMonoid[A]: Monoid[Set[A]] = new Monoid[Set[A]] {
-    override def empty: Set[A] = Set.empty[A]
-
-    override def combine(x: Set[A], y: Set[A]): Set[A] = x union y
-  }
-}
-
-object SetSemiGroup {
-  implicit def setIntersectionSemigroup[A]: SemiGroup[Set[A]] = new SemiGroup[Set[A]] {
-    override def combine(x: Set[A], y: Set[A]): Set[A] = x intersect y
-  }
-}
-
-object MonoidsRunner extends App {
-  import BooleanMonoids._
-
-  def identityLaw[A](x: A)(implicit m: Monoid[A]): Boolean = {
-    (m.combine(x, m.empty) == x) &&
-    (m.combine(m.empty, x) == x)
-  }
-
-  assert(identityLaw(false)(booleanOrMonoid),
-         "Boolean Or Monoid empty is not neutral")
-  assert(identityLaw(true)(booleanAndMonoid),
-         "Boolean And Monoid empty is not neutral")
-  assert(identityLaw(false)(booleanEitherMonoid),
-    "Boolean Either Monoid empty is not neutral")
-  assert(identityLaw(true)(booleanXnorMonoid),
-    "Boolean Xnor Monoid empty is not neutral")
-
 }
