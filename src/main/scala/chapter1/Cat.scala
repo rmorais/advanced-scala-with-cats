@@ -1,29 +1,26 @@
 package chapter1
 
-import cats.Show
-import cats.instances.int._
-import cats.instances.string._
-import cats.syntax.show._
-import cats.syntax.eq._
-import cats.Eq
+import PrintableInstances._
 
-final case class Cat(
-    name: String,
-    age: Int,
-    color: String
-)
+final case class Cat(name: String, age: Int, color: String)
 
 object Cat {
-  implicit val catShow = Show.show[Cat] { cat =>
-    val name = cat.name.show
-    val age = cat.age.show
-    val color = cat.color.show
-    s"$name is a $age year-old $color cat.(Using cats.Show)"
+  implicit val printableCat: Printable[Cat] = new Printable[Cat] {
+    override def format(cat: Cat): String = {
+      val name = Printable.format(cat.name)
+      val age = Printable.format(cat.age)
+      val color = Printable.format(cat.color)
+      s" $name is a $age year-old $color cat."
+    }
   }
+}
 
-  implicit val catEq = Eq.instance[Cat] { (cat1, cat2) =>
-    (cat1.name === cat2.name) &&
-    (cat1.color === cat2.color) &&
-    (cat1.age === cat2.age)
-  }
+object CatRunner extends App {
+  val cat = Cat(name = "Teco", age = 4, color = "White")
+
+  Printable.print(cat)
+
+  //using syntax
+  import PrintableSyntax._
+  cat.print
 }
