@@ -2,7 +2,11 @@ package chapter2
 
 import cats.syntax.semigroup._
 
+
 object SuperAdder {
 
-  def add[A](items: List[A])(implicit ev: cats.Monoid[A]): A = items.foldLeft(cats.Monoid[A].empty)( _ |+| _)
+  def add(items: List[Int]): Int = items.foldLeft(0)(_ + _)
+
+  def add2[A](items: List[A])(implicit m: cats.Monoid[A]): A = items.foldLeft(m.empty)(_ |+| _)
+
 }
