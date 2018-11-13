@@ -1,7 +1,13 @@
 package chapter1
 
 trait Printable[A] {
+  self =>
+
   def format(a: A): String
+
+  def contramap[B](f: B => A):Printable[B] = new Printable[B] {
+    override def format(b: B): String = self.format(f(b))
+  }
 }
 
 object PrintableInstances {
@@ -11,7 +17,11 @@ object PrintableInstances {
   }
 
   implicit val stringPrintable: Printable[String] = new Printable[String] {
-    override def format(a: String): String = a
+    override def format(a: String): String = "\"" + a + "\""
+  }
+
+  implicit val booleanPrintable: Printable[Boolean] = new Printable[Boolean] {
+    override def format(a: Boolean): String = if(a) "yes" else "no"
   }
  }
 
@@ -21,6 +31,7 @@ object Printable {
   def format[A](a: A)(implicit printable: Printable[A]): String = printable.format(a)
 
   def print[A](a: A)(implicit printable: Printable[A]): Unit = println(format(a))
+
 }
 
 //Extension Methods
