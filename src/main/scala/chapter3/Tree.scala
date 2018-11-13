@@ -1,14 +1,12 @@
 package chapter3
 
 import cats.Functor
-import cats.syntax.functor._
 
 trait Tree[+A]
 
 final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
 final case class Leaf[A](value: A) extends Tree[A]
-
 
 object Tree {
   implicit val treeFunctor: Functor[Tree] = new Functor[Tree] {
