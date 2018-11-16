@@ -14,6 +14,7 @@ lazy val root = (project in file(".")).
       scalaTest % Test
     )
   )
+scalacOptions in (Compile, console) ~= (_.filterNot(_ == "-Xfatal-warnings"))
 
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
